@@ -1,0 +1,13 @@
+{
+  "name": "neurotrack-ai",
+  "version": "3.0.0",
+  "description": "NeuroTrack AI - Two Site Versions",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "deploy": "wrangler deploy"
+  },
+  "keywords": ["ai", "mental-health", "autism", "schizophrenia"],
+  "author": "NeuroTrack AI Team",
+  "license": "MIT"
+}
