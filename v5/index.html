@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroTrack AI - نسخه نهایی با انیمیشن و ویدیو</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+        
+        /* Animations */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes glow { 0%,100% { box-shadow: 0 0 20px rgba(102,126,234,0.3); } 50% { box-shadow: 0 0 40px rgba(102,126,234,0.6); } }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @keyframes bounce { 0%,20%,50%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
+        
+        .animate-fadeInUp { animation: fadeInUp 0.6s ease forwards; }
+        .animate-fadeInDown { animation: fadeInDown 0.6s ease forwards; }
+        .animate-fadeInLeft { animation: fadeInLeft 0.6s ease forwards; }
+        .animate-fadeInRight { animation: fadeInRight 0.6s ease forwards; }
+        .animate-scaleIn { animation: scaleIn 0.5s ease forwards; }
+        .animate-pulse { animation: pulse 2s infinite; }
+        .animate-glow { animation: glow 2s infinite; }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-bounce { animation: bounce 2s infinite; }
+        
+        .delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .delay-3 { animation-delay: 0.3s; opacity: 0; }
+        .delay-4 { animation-delay: 0.4s; opacity: 0; }
+        .delay-5 { animation-delay: 0.5s; opacity: 0; }
+        
+        /* Gradient Animation */
+        .gradient-animate {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #667eea);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        /* Shimmer Effect */
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        /* Header */
+        .wp-header { background: #1e1e1e; border-bottom: 3px solid #667eea; position: fixed; width: 100%; z-index: 1000; }
+        .wp-top-bar { background: linear-gradient(135deg, #667eea, #764ba2); padding: 8px 0; font-size: 12px; }
+        .wp-top-bar .container { display: flex; justify-content: space-between; align-items: center; }
+        .wp-top-bar a { color: #fff; text-decoration: none; margin-left: 15px; transition: 0.3s; }
+        .wp-top-bar a:hover { opacity: 0.8; }
+        .wp-main-bar { background: #1e1e1e; padding: 12px 0; }
+        .wp-main-bar .container { display: flex; justify-content: space-between; align-items: center; }
+        .wp-logo { display: flex; align-items: center; gap: 12px; }
+        .wp-logo-icon { width: 42px; height: 42px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; animation: pulse 3s infinite; }
+        .wp-logo-text { font-size: 18px; font-weight: 700; }
+        .wp-logo-sub { font-size: 11px; color: #999; }
+        .wp-nav { display: flex; gap: 0; }
+        .wp-nav-item { padding: 12px 16px; color: #ccc; text-decoration: none; font-size: 13px; font-weight: 500; transition: 0.3s; cursor: pointer; display: flex; align-items: center; gap: 7px; border-bottom: 3px solid transparent; }
+        .wp-nav-item:hover, .wp-nav-item.active { color: #fff; background: rgba(255,255,255,0.05); border-bottom-color: #667eea; }
+        .wp-nav-item i { font-size: 14px; }
+        .wp-nav-badge { background: #667eea; color: #fff; font-size: 9px; padding: 2px 5px; border-radius: 8px; }
+        .wp-dropdown { position: relative; }
+        .wp-dropdown-content { display: none; position: absolute; top: 100%; right: 0; background: #2d2d2d; min-width: 200px; border-radius: 0 0 8px 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); }
+        .wp-dropdown:hover .wp-dropdown-content { display: block; animation: fadeInDown 0.3s ease; }
+        .wp-dropdown-item { padding: 10px 14px; color: #ccc; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: 0.3s; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
+        .wp-dropdown-item:hover { background: #667eea; color: #fff; }
+        .wp-dropdown-item i { width: 16px; text-align: center; }
+        .wp-admin-bar { background: #23282d; padding: 8px 0; display: flex; gap: 10px; overflow-x: auto; }
+        .wp-admin-btn { background: #333; color: #ccc; border: 1px solid #444; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+        .wp-admin-btn:hover { background: #667eea; color: #fff; border-color: #667eea; }
+        .wp-admin-btn i { font-size: 10px; }
+        .wp-mobile-toggle { display: none; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+        
+        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+        
+        /* Hero */
+        .hero { min-height: 100vh; display: flex; align-items: center; padding-top: 140px; position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at 30% 50%, rgba(102,126,234,0.15), transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(118,75,162,0.1), transparent 50%); }
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; position: relative; z-index: 1; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(102,126,234,0.15); color: #667eea; padding: 10px 20px; border-radius: 25px; font-size: 13px; font-weight: 600; margin-bottom: 20px; border: 1px solid rgba(102,126,234,0.3); }
+        .hero h1 { font-size: 48px; font-weight: 900; line-height: 1.1; margin-bottom: 18px; }
+        .hero h1 span { background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 16px; color: #888; margin-bottom: 28px; line-height: 1.8; }
+        .btns { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-p { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; }
+        .btn-p:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
+        .btn-o { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-o:hover { border-color: #667eea; background: rgba(102,126,234,0.1); }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 32px; }
+        .stat { text-align: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); transition: 0.3s; }
+        .stat:hover { border-color: rgba(102,126,234,0.3); transform: translateY(-3px); }
+        .stat-icon { font-size: 18px; margin-bottom: 6px; color: #667eea; }
+        .stat-n { font-size: 26px; font-weight: 800; background: linear-gradient(135deg, #667eea, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-l { font-size: 11px; color: #666; margin-top: 3px; }
+        
+        /* Video Section */
+        .video-section { padding: 60px 0; background: #111; }
+        .video-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .video-card { background: #1a1a1a; border-radius: 12px; overflow: hidden; border: 1px solid #2a2a2a; transition: 0.3s; }
+        .video-card:hover { transform: translateY(-5px); border-color: #667eea; }
+        .video-thumbnail { width: 100%; height: 180px; background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2)); display: flex; align-items: center; justify-content: center; position: relative; }
+        .video-thumbnail i { font-size: 48px; color: #667eea; transition: 0.3s; }
+        .video-card:hover .video-thumbnail i { transform: scale(1.2); }
+        .video-play { position: absolute; width: 60px; height: 60px; background: rgba(102,126,234,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+        .video-play:hover { transform: scale(1.1); background: #667eea; }
+        .video-play i { font-size: 24px; color: #fff; }
+        .video-info { padding: 16px; }
+        .video-info h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+        .video-info p { font-size: 12px; color: #888; }
+        .video-info .meta { display: flex; gap: 12px; margin-top: 8px; font-size: 11px; color: #666; }
+        .video-info .meta i { margin-left: 4px; }
+        
+        /* Presentation Section */
+        .presentation-section { padding: 60px 0; }
+        .presentation-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .slide-card { background: #1a1a1a; border-radius: 10px; overflow: hidden; border: 1px solid #2a2a2a; transition: 0.3s; cursor: pointer; }
+        .slide-card:hover { transform: translateY(-4px); border-color: #667eea; }
+        .slide-preview { width: 100%; height: 140px; background: linear-gradient(135deg, #1e1e2e, #2d2d3d); display: flex; align-items: center; justify-content: center; font-size: 32px; position: relative; }
+        .slide-number { position: absolute; top: 8px; left: 8px; background: #667eea; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+        .slide-info { padding: 12px; }
+        .slide-info h4 { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+        .slide-info p { font-size: 11px; color: #888; }
+        
+        /* Sections */
+        .section { padding: 70px 0; }
+        .section-t { text-align: center; margin-bottom: 40px; }
+        .section-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(102,126,234,0.15); color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+        .section-t h2 { font-size: 30px; font-weight: 800; margin-bottom: 10px; }
+        .section-t h2 span { background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .section-t p { color: #666; font-size: 14px; max-width: 500px; margin: auto; }
+        
+        /* Grids */
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        /* Cards */
+        .card { background: #1a1a1a; padding: 20px; border-radius: 10px; border: 1px solid #2a2a2a; transition: 0.3s; cursor: pointer; }
+        .card:hover { transform: translateY(-3px); border-color: #667eea; box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .card-icon { width: 40px; height: 40px; background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #667eea; }
+        .card h3 { font-size: 14px; font-weight: 700; }
+        .card p { font-size: 12px; color: #888; line-height: 1.6; }
+        
+        /* Paper Cards */
+        .paper-card { background: #1a1a1a; padding: 20px; border-radius: 10px; border: 1px solid #2a2a2a; }
+        .paper-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .cnt { background: linear-gradient(135deg, #667eea, #764ba2); padding: 3px 8px; border-radius: 12px; font-size: 11px; }
+        .areas { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+        .tag { background: rgba(102,126,234,0.12); color: #667eea; padding: 4px 8px; border-radius: 5px; font-size: 10px; display: flex; align-items: center; gap: 3px; transition: 0.3s; cursor: pointer; }
+        .tag:hover { background: rgba(102,126,234,0.25); }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 6px; margin-bottom: 18px; justify-content: center; flex-wrap: wrap; }
+        .tab { background: #1a1a1a; color: #ccc; border: 1px solid #2a2a2a; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+        .tab.active { background: #667eea; border-color: #667eea; color: #fff; }
+        .tab:hover { background: rgba(102,126,234,0.2); }
+        
+        /* Commit Cards */
+        .commit-card { background: #1a1a1a; padding: 24px; border-radius: 10px; border: 1px solid #2a2a2a; text-align: center; transition: 0.3s; }
+        .commit-card:hover { transform: translateY(-3px); border-color: #667eea; }
+        .commit-icon { width: 50px; height: 50px; background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 12px; color: #667eea; }
+        .commit-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+        .commit-card p { font-size: 12px; color: #888; line-height: 1.6; margin-bottom: 10px; }
+        .badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 600; }
+        
+        /* API Cards */
+        .api-card { background: #1a1a1a; padding: 12px; border-radius: 8px; border: 1px solid #2a2a2a; font-family: 'Courier New', monospace; transition: 0.3s; }
+        .api-card:hover { transform: translateY(-2px); border-color: #4CAF50; }
+        .api-card .method { color: #4CAF50; font-weight: bold; font-size: 10px; background: rgba(76,175,80,0.1); padding: 2px 5px; border-radius: 3px; }
+        .api-card .endpoint { color: #667eea; font-size: 11px; }
+        .api-card .desc { color: #666; font-size: 10px; margin-top: 4px; }
+        
+        /* Contact */
+        .contact-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: #1a1a1a; border-radius: 8px; border: 1px solid #2a2a2a; transition: 0.3s; margin-bottom: 8px; }
+        .contact-item:hover { border-color: #667eea; }
+        .contact-icon { width: 40px; height: 40px; background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #667eea; }
+        .contact-item h4 { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .contact-item p { font-size: 11px; color: #888; }
+        .socials { display: flex; gap: 8px; margin-top: 16px; }
+        .social { width: 40px; height: 40px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.3s; text-decoration: none; border: 1px solid #2a2a2a; color: #ccc; }
+        .social:hover { background: #667eea; transform: translateY(-2px); color: #fff; }
+        
+        /* Chart */
+        .chart-container { background: #1a1a1a; padding: 16px; border-radius: 10px; border: 1px solid #2a2a2a; }
+        
+        /* Footer */
+        .footer { background: #141414; padding: 40px 0 20px; border-top: 1px solid #2a2a2a; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        .footer h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .footer h4 i { color: #667eea; font-size: 12px; }
+        .footer p { font-size: 11px; color: #666; line-height: 1.8; }
+        .footer a { font-size: 11px; color: #666; text-decoration: none; display: flex; align-items: center; gap: 5px; line-height: 2; transition: 0.3s; }
+        .footer a:hover { color: #667eea; }
+        .footer a i { width: 12px; text-align: center; font-size: 10px; }
+        .footer-bottom { text-align: center; padding-top: 16px; border-top: 1px solid #1e1e1e; }
+        .footer-bottom p { font-size: 10px; color: #444; }
+        
+        /* Responsive */
+        @media (max-width: 1024px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } .video-grid { grid-template-columns: repeat(2, 1fr); } .presentation-grid { grid-template-columns: repeat(2, 1fr); } .footer-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) { .hero-grid, .grid-2 { grid-template-columns: 1fr; } .hero h1 { font-size: 32px; } .stats { grid-template-columns: repeat(2, 1fr); } .wp-nav { display: none; } .wp-mobile-toggle { display: block; } .wp-top-bar, .wp-admin-bar { display: none; } .grid-4, .grid-3, .video-grid, .presentation-grid { grid-template-columns: 1fr; } .footer-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const AUTISM_AREAS = [{icon:"fa-brain",name:"اتصالات مغزی"},{icon:"fa-dna",name:"ژنتیک"},{icon:"fa-pills",name:"درمان"},{icon:"fa-microscope",name:"تشخیص"},{icon:"fa-users",name:"خانواده"},{icon:"fa-graduation-cap",name:"آموزش"},{icon:"fa-ear-listen",name:"حسی"},{icon:"fa-comments",name:"ارتباط"},{icon:"fa-person",name:"بزرگسالان"},{icon:"fa-laptop-code",name:"فناوری"}];
+const SCHIZO_AREAS = [{icon:"fa-brain",name:"اتصالات مغزی"},{icon:"fa-dna",name:"ژنتیک"},{icon:"fa-pills",name:"درمان"},{icon:"fa-microscope",name:"تشخیص"},{icon:"fa-users",name:"خانواده"},{icon:"fa-flask",name:"عصب‌زیستی"},{icon:"fa-puzzle-piece",name:"شناخت"},{icon:"fa-star",name:"بهبود"},{icon:"fa-triangle-exclamation",name:"همراهی"},{icon:"fa-laptop-code",name:"فناوری"}];
+
+const FEATURES = [{icon:"fa-brain",title:"تشخیص AI",desc:"تشخیص هوشمند با الگوریتم‌های یادگیری عمیق"},{icon:"fa-chart-line",title:"تحلیل داده",desc:"تحلیل جامع داده‌های بالینی"},{icon:"fa-pills",title:"توصیه درمان",desc:"پروتکل‌های مبتنی بر شواهد FDA"},{icon:"fa-book-medical",title:"300 مقاله",desc:"مقالات علمی معتبر با DOI"},{icon:"fa-robot",title:"ربات تلگرام",desc:"دسترسی آسان 24 ساعته"},{icon:"fa-globe",title:"چند زبانه",desc:"فارسی، انگلیسی، عربی، ترکی"},{icon:"fa-envelope",title:"سیستم ایمیل",desc:"ارسال به سرمایه‌گذاران"},{icon:"fa-code",title:"API کامل",desc:"رابط RESTful"}];
+
+const COMMITS = [{icon:"fa-flask",title:"تعهد علمی",desc:"مقالات Peer-Reviewed",badge:"Peer-Reviewed"},{icon:"fa-shield-heart",title:"تعهد اخلاقی",desc:"حفظ حریم خصوصی و FDA",badge:"HIPAA"},{icon:"fa-hand-holding-heart",title:"تعهد اجتماعی",desc:"دسترسی رایگان",badge:"Free Access"}];
+
+const VIDEOS = [{title:"مقدمه‌ای بر اوتیسم",desc:"آشنایی با اختلال طیف اوتیسم",duration:"12:30",views:"2.5K"},{title:"اسکیزوفرنی چیست؟",desc:"توضیح ساده اسکیزوفرنی",duration:"15:45",views:"3.1K"},{title:"درمان‌های نوین",desc:"آخرین روش‌های درمانی",duration:"18:20",views:"1.8K"},{title:"هوش مصنوعی در سلامت",desc:"کاربرد AI در تشخیص",duration:"22:10",views:"4.2K"},{title:"حمایت خانواده‌ها",desc:"راهنمای خانواده‌ها",duration:"14:55",views:"2.9K"},{title:"تحقیقات جدید",desc:"آخرین یافته‌های علمی",duration:"20:30",views:"3.5K"}];
+
+const SLIDES = [{icon:"fa-brain",title:"مقدمه",desc:"معرفی پلتفرم"},{icon:"fa-chart-pie",title:"آمار",desc:"داده‌های جهانی"},{icon:"fa-microscope",title:"تشخیص",desc:"ابزارهای تشخیصی"},{icon:"fa-pills",title:"درمان",desc:"روش‌های درمانی"},{icon:"fa-robot",title:"AI",desc:"هوش مصنوعی"},{icon:"fa-book",title:"مقالات",desc:"300 مقاله علمی"},{icon:"fa-users",title:"خانواده",desc:"حمایت خانواده‌ها"},{icon:"fa-handshake",title:"همکاری",desc:"مشارکت‌ها"}];
+
+function Header({activePage,setActivePage}) {
+    return (
+        <header>
+            <div className="wp-top-bar"><div className="container">
+                <div><span><i className="fas fa-phone"></i> +1-208-5033653</span><span style={{marginRight:15}}><i className="fas fa-envelope"></i> neurotrack@ai.com</span></div>
+                <div><a href="https://t.me/Ai_autism_schizo"><i className="fab fa-telegram"></i> EN</a><a href="https://t.me/Ai_autism_schizo_fa"><i className="fab fa-telegram"></i> FA</a><a href="https://t.me/Ai_autism_schizo_group"><i className="fas fa-users"></i> Group</a></div>
+            </div></div>
+            <div className="wp-main-bar"><div className="container">
+                <div className="wp-logo"><div className="wp-logo-icon"><i className="fas fa-brain"></i></div><div><div className="wp-logo-text">NeuroTrack AI</div><div className="wp-logo-sub">Mental Health Platform</div></div></div>
+                <nav className="wp-nav">
+                    <a className={`wp-nav-item ${activePage==='home'?'active':''}`} onClick={()=>setActivePage('home')}><i className="fas fa-home"></i> خانه</a>
+                    <div className="wp-dropdown"><a className={`wp-nav-item ${activePage==='features'?'active':''}`}><i className="fas fa-th-large"></i> ویژگی‌ها <i className="fas fa-chevron-down" style={{fontSize:8}}></i></a>
+                    <div className="wp-dropdown-content">
+                        <a className="wp-dropdown-item" onClick={()=>setActivePage('features')}><i className="fas fa-brain"></i> تشخیص AI</a>
+                        <a className="wp-dropdown-item" onClick={()=>setActivePage('features')}><i className="fas fa-chart-line"></i> تحلیل داده</a>
+                        <a className="wp-dropdown-item" onClick={()=>setActivePage('features')}><i className="fas fa-pills"></i> توصیه درمان</a>
+                        <a className="wp-dropdown-item" onClick={()=>setActivePage('features')}><i className="fas fa-robot"></i> ربات تلگرام</a>
+                    </div></div>
+                    <a className={`wp-nav-item ${activePage==='papers'?'active':''}`} onClick={()=>setActivePage('papers')}><i className="fas fa-book"></i> مقالات <span className="wp-nav-badge">300</span></a>
+                    <a className={`wp-nav-item ${activePage==='videos'?'active':''}`} onClick={()=>setActivePage('videos')}><i className="fas fa-video"></i> ویدیو</a>
+                    <a className={`wp-nav-item ${activePage==='presentation'?'active':''}`} onClick={()=>setActivePage('presentation')}><i className="fas fa-presentation-screen"></i> ارائه</a>
+                    <a className={`wp-nav-item ${activePage==='contact'?'active':''}`} onClick={()=>setActivePage('contact')}><i className="fas fa-envelope"></i> تماس</a>
+                    <a className="wp-nav-item" href="https://t.me/Ai_autism_schizo_bot"><i className="fas fa-robot"></i> ربات</a>
+                </nav>
+                <button className="wp-mobile-toggle"><i className="fas fa-bars"></i></button>
+            </div></div>
+            <div className="wp-admin-bar"><div className="container" style={{display:'flex',gap:8,overflowX:'auto'}}>
+                <button className="wp-admin-btn"><i className="fas fa-tachometer-alt"></i> داشبورد</button>
+                <button className="wp-admin-btn"><i className="fas fa-book"></i> 300 مقاله</button>
+                <button className="wp-admin-btn"><i className="fas fa-video"></i> ویدیو</button>
+                <button className="wp-admin-btn"><i className="fas fa-presentation-screen"></i> ارائه</button>
+                <button className="wp-admin-btn"><i className="fas fa-chart-bar"></i> آمار</button>
+            </div></div>
+        </header>
+    );
+}
+
+function Hero({setActivePage}) {
+    return (
+        <section className="hero">
+            <div className="container">
+                <div className="hero-grid">
+                    <div className="animate-fadeInRight">
+                        <div className="hero-badge"><i className="fas fa-rocket"></i> نسخه 6.0 - با ویدیو و ارائه</div>
+                        <h1>آینده <span>سلامت روان</span> با هوش مصنوعی</h1>
+                        <p>پلتفرم پیشرفته تشخیص و درمان اختلالات طیف اوتیسم و اسکیزوفرنی با 300 مقاله، ویدیو و ارائه</p>
+                        <div className="btns">
+                            <a href="https://t.me/Ai_autism_schizo_bot" className="btn btn-p"><i className="fas fa-robot"></i> شروع ربات</a>
+                            <a className="btn btn-o" onClick={()=>setActivePage('papers')}><i className="fas fa-book"></i> مقالات</a>
+                            <a className="btn btn-o" onClick={()=>setActivePage('videos')}><i className="fas fa-video"></i> ویدیو</a>
+                        </div>
+                        <div className="stats">
+                            <div className="stat animate-fadeInUp delay-1"><div className="stat-icon"><i className="fas fa-book"></i></div><div className="stat-n">300</div><div className="stat-l">مقاله</div></div>
+                            <div className="stat animate-fadeInUp delay-2"><div className="stat-icon"><i className="fas fa-video"></i></div><div className="stat-n">6</div><div className="stat-l">ویدیو</div></div>
+                            <div className="stat animate-fadeInUp delay-3"><div className="stat-icon"><i className="fas fa-presentation-screen"></i></div><div className="stat-n">8</div><div className="stat-l">اسلاید</div></div>
+                            <div className="stat animate-fadeInUp delay-4"><div className="stat-icon"><i className="fas fa-headset"></i></div><div className="stat-n">24/7</div><div className="stat-l">پشتیبانی</div></div>
+                        </div>
+                    </div>
+                    <div className="animate-fadeInLeft">
+                        <div style={{width:'100%',height:380,borderRadius:20,overflow:'hidden',position:'relative',background:'linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2))',border:'1px solid rgba(255,255,255,0.1)'}}>
+                            <div style={{position:'absolute',top:0,left:0,width:'100%',height:'100%',background:'conic-gradient(from 0deg, transparent, rgba(102,126,234,0.15), transparent)',animation:'rotate 20s linear infinite'}}></div>
+                            <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'100%'}}>
+                                <div style={{fontSize:80,animation:'float 6s ease-in-out infinite',filter:'drop-shadow(0 0 30px rgba(102,126,234,0.5))'}}><i className="fas fa-brain"></i></div>
+                                <div style={{marginTop:20,display:'flex',gap:10}}>
+                                    <div className="animate-pulse" style={{background:'rgba(102,126,234,0.3)',padding:'8px 16px',borderRadius:8,fontSize:12,display:'flex',alignItems:'center',gap:6}}><i className="fas fa-play"></i> ویدیو معرفی</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function VideoSection() {
+    return (
+        <section className="video-section">
+            <div className="container">
+                <div className="section-t">
+                    <div className="section-badge"><i className="fas fa-video"></i> ویدیوها</div>
+                    <h2>ویدیوهای <span>آموزشی</span></h2>
+                    <p>ویدیوهای آموزشی درباره اوتیسم، اسکیزوفرنی و هوش مصنوعی</p>
+                </div>
+                <div className="video-grid">
+                    {VIDEOS.map((v,i) => (
+                        <div key={i} className={`video-card animate-fadeInUp delay-${i+1}`}>
+                            <div className="video-thumbnail">
+                                <div className="video-play"><i className="fas fa-play"></i></div>
+                            </div>
+                            <div className="video-info">
+                                <h3>{v.title}</h3>
+                                <p>{v.desc}</p>
+                                <div className="meta">
+                                    <span><i className="fas fa-clock"></i> {v.duration}</span>
+                                    <span><i className="fas fa-eye"></i> {v.views}</span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function PresentationSection() {
+    return (
+        <section className="presentation-section">
+            <div className="container">
+                <div className="section-t">
+                    <div className="section-badge"><i className="fas fa-presentation-screen"></i> ارائه</div>
+                    <h2>ارائه <span>PowerPoint</span></h2>
+                    <p>اسلایدهای ارائه پلتفرم NeuroTrack AI</p>
+                </div>
+                <div className="presentation-grid">
+                    {SLIDES.map((s,i) => (
+                        <div key={i} className={`slide-card animate-scaleIn delay-${i+1}`}>
+                            <div className="slide-preview">
+                                <span className="slide-number">{i+1}</span>
+                                <i className={`fas ${s.icon}`} style={{color:'#667eea'}}></i>
+                            </div>
+                            <div className="slide-info">
+                                <h4>{s.title}</h4>
+                                <p>{s.desc}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function Features() {
+    return (
+        <section className="section">
+            <div className="container">
+                <div className="section-t"><div className="section-badge"><i className="fas fa-th-large"></i> ویژگی‌ها</div><h2>ابزارهای <span>پیشرفته</span></h2><p>مجموعه کامل ابزارها</p></div>
+                <div className="grid-4">{FEATURES.map((f,i) => (<div key={i} className={`card animate-fadeInUp delay-${i+1}`}><div className="card-header"><div className="card-icon"><i className={`fas ${f.icon}`}></i></div><h3>{f.title}</h3></div><p>{f.desc}</p></div>))}</div>
+            </div>
+        </section>
+    );
+}
+
+function Papers() {
+    const [activeTab, setActiveTab] = useState('autism');
+    const chartRef = useRef(null);
+    useEffect(() => {
+        if (chartRef.current) {
+            new Chart(chartRef.current.getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: (activeTab==='autism'?AUTISM_AREAS:SCHIZO_AREAS).map(a=>a.name), datasets: [{ data: Array(10).fill(10), backgroundColor: ['#667eea','#764ba2','#f093fb','#4CAF50','#ff9800','#e91e63','#00bcd4','#ff5722','#9c27b0','#607d8b'], borderWidth: 0 }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#888', font: { size: 9 } } } } }
+            });
+        }
+    }, [activeTab]);
+    return (
+        <section className="section">
+            <div className="container">
+                <div className="section-t"><div className="section-badge"><i className="fas fa-book"></i> مقالات</div><h2>300 مقاله <span>علمی</span></h2><p>مقالات معتبر با DOI تأیید شده</p></div>
+                <div className="tabs">
+                    <button className={`tab ${activeTab==='autism'?'active':''}`} onClick={()=>setActiveTab('autism')}><i className="fas fa-puzzle-piece"></i> اوتیسم (100)</button>
+                    <button className={`tab ${activeTab==='schizo'?'active':''}`} onClick={()=>setActiveTab('schizo')}><i className="fas fa-brain"></i> اسکیزوفرنی (100)</button>
+                    <button className={`tab ${activeTab==='new'?'active':''}`} onClick={()=>setActiveTab('new')}><i className="fas fa-sparkles"></i> جدید (100)</button>
+                </div>
+                <div className="grid-2">
+                    <div className="paper-card animate-fadeInRight"><h3><i className={`fas ${activeTab==='autism'?'fa-puzzle-piece':'fa-brain'}`} style={{color:'#667eea'}}></i> {activeTab==='autism'?'اوتیسم':activeTab==='schizo'?'اسکیزوفرنی':'جدید'} <span className="cnt">100</span></h3><p>مقالات معتبر</p><div className="areas">{(activeTab==='autism'?AUTISM_AREAS:SCHIZO_AREAS).map((a,i) => (<span key={i} className="tag"><i className={`fas ${a.icon}`}></i> {a.name}</span>))}</div></div>
+                    <div className="chart-container animate-fadeInLeft"><canvas ref={chartRef}></canvas></div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function Commitments() {
+    return (
+        <section className="section">
+            <div className="container">
+                <div className="section-t"><div className="section-badge"><i className="fas fa-handshake"></i> تعهدات</div><h2>سه تعهد <span>اصلی</span></h2></div>
+                <div className="grid-3">{COMMITS.map((c,i) => (<div key={i} className={`commit-card animate-scaleIn delay-${i+1}`}><div className="commit-icon"><i className={`fas ${c.icon}`}></i></div><h3>{c.title}</h3><p>{c.desc}</p><div className="badge"><i className="fas fa-check"></i> {c.badge}</div></div>))}</div>
+            </div>
+        </section>
+    );
+}
+
+function Contact() {
+    return (
+        <section className="section">
+            <div className="container">
+                <div className="section-t"><div className="section-badge"><i className="fas fa-envelope"></i> تماس</div><h2>تماس <span>با ما</span></h2></div>
+                <div className="grid-2">
+                    <div className="animate-fadeInRight">
+                        <div className="contact-item"><div className="contact-icon"><i className="fas fa-phone"></i></div><div><h4>تلفن</h4><p>+1-208-5033653</p></div></div>
+                        <div className="contact-item"><div className="contact-icon"><i className="fab fa-whatsapp"></i></div><div><h4>واتساپ</h4><p>+1-208-5033653</p></div></div>
+                        <div className="contact-item"><div className="contact-icon"><i className="fas fa-envelope"></i></div><div><h4>ایمیل</h4><p>neurotrack@ai.com</p></div></div>
+                        <div className="socials">
+                            <a href="https://t.me/Ai_autism_schizo_bot" className="social"><i className="fas fa-robot"></i></a>
+                            <a href="https://t.me/Ai_autism_schizo" className="social"><i className="fab fa-telegram"></i></a>
+                            <a href="https://t.me/Ai_autism_schizo_fa" className="social"><i className="fab fa-telegram"></i></a>
+                            <a href="https://t.me/Ai_autism_schizo_group" className="social"><i className="fas fa-users"></i></a>
+                        </div>
+                    </div>
+                    <div className="animate-fadeInLeft"><iframe src="https://neurotrack-bot.elasa2next.workers.dev/papers" style={{width:'100%',height:380,border:'none',borderRadius:12,background:'#1a1a1a'}}></iframe></div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function Footer({setActivePage}) {
+    return (
+        <footer className="footer">
+            <div className="container">
+                <div className="footer-grid">
+                    <div><h4><i className="fas fa-brain"></i> NeuroTrack AI</h4><p>پلتفرم هوش مصنوعی سلامت روان - 300 مقاله، ویدیو و ارائه</p></div>
+                    <div><h4><i className="fas fa-sitemap"></i> صفحات</h4><a onClick={()=>setActivePage('home')}><i className="fas fa-home"></i> خانه</a><a onClick={()=>setActivePage('features')}><i className="fas fa-th-large"></i> ویژگی‌ها</a><a onClick={()=>setActivePage('papers')}><i className="fas fa-book"></i> مقالات</a><a onClick={()=>setActivePage('videos')}><i className="fas fa-video"></i> ویدیو</a></div>
+                    <div><h4><i className="fas fa-robot"></i> ربات‌ها</h4><a href="https://t.me/Ai_autism_schizo_bot"><i className="fas fa-robot"></i> ربات</a><a href="https://t.me/Ai_autism_schizo"><i className="fas fa-globe"></i> EN</a><a href="https://t.me/Ai_autism_schizo_fa"><i className="fas fa-flag"></i> FA</a><a href="https://t.me/Ai_autism_schizo_group"><i className="fas fa-users"></i> گروه</a></div>
+                    <div><h4><i className="fas fa-address-book"></i> تماس</h4><a><i className="fas fa-phone"></i> +1-208-5033653</a><a><i className="fab fa-whatsapp"></i> WhatsApp</a><a><i className="fas fa-envelope"></i> neurotrack@ai.com</a></div>
+                </div>
+                <div className="footer-bottom"><p>© 2025 NeuroTrack AI - Version 6.0 (With Videos & Presentations)</p></div>
+            </div>
+        </footer>
+    );
+}
+
+function App() {
+    const [activePage, setActivePage] = useState('home');
+    return (<><Header activePage={activePage} setActivePage={setActivePage} /><Hero setActivePage={setActivePage} /><VideoSection /><PresentationSection /><Features /><Papers /><Commitments /><Contact /><Footer setActivePage={setActivePage} /></>);
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
