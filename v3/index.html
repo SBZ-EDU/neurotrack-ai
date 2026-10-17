@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroTrack AI - نسخه 3 (کامل)</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #667eea; border-radius: 4px; }
+        
+        /* Header */
+        .header { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); padding: 15px 0; position: fixed; width: 100%; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+        .hdr { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; }
+        .nav { display: flex; gap: 20px; align-items: center; }
+        .nav a { color: #fff; text-decoration: none; font-size: 14px; font-weight: 500; transition: 0.3s; padding: 8px 16px; border-radius: 8px; }
+        .nav a:hover, .nav a.active { background: rgba(102,126,234,0.2); color: #667eea; }
+        .lang { display: flex; gap: 5px; }
+        .lang-btn { background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.3s; }
+        .lang-btn.active { background: #667eea; }
+        .mobile-menu { display: none; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+        
+        /* Hero */
+        .hero { min-height: 100vh; display: flex; align-items: center; padding-top: 80px; position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at 20% 50%, rgba(102,126,234,0.15), transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(118,75,162,0.1), transparent 50%); }
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
+        .hero-badge { display: inline-block; background: rgba(102,126,234,0.2); color: #667eea; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+        .hero h1 { font-size: 52px; font-weight: 900; line-height: 1.1; margin-bottom: 20px; }
+        .hero h1 span { background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 18px; color: #999; margin-bottom: 30px; line-height: 1.8; }
+        .btns { display: flex; gap: 15px; flex-wrap: wrap; }
+        .btn { padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-p { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; }
+        .btn-p:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102,126,234,0.4); }
+        .btn-o { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-o:hover { border-color: #667eea; background: rgba(102,126,234,0.1); }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 40px; }
+        .stat { text-align: center; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .stat:hover { border-color: rgba(102,126,234,0.3); transform: translateY(-3px); }
+        .stat-n { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #667eea, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-l { font-size: 12px; color: #666; margin-top: 5px; }
+        .visual { width: 100%; height: 420px; background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border-radius: 24px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .visual::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(from 0deg, transparent, rgba(102,126,234,0.2), transparent); animation: rotate 15s linear infinite; }
+        @keyframes rotate { to { transform: rotate(360deg); } }
+        .visual-icon { font-size: 100px; z-index: 1; animation: float 6s ease-in-out infinite; filter: drop-shadow(0 0 30px rgba(102,126,234,0.5)); }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        
+        /* Sections */
+        .section { padding: 100px 0; }
+        .section-t { text-align: center; margin-bottom: 60px; }
+        .section-badge { display: inline-block; background: rgba(102,126,234,0.2); color: #667eea; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 15px; }
+        .section-t h2 { font-size: 36px; font-weight: 800; margin-bottom: 15px; }
+        .section-t h2 span { background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .section-t p { color: #666; font-size: 16px; max-width: 600px; margin: auto; }
+        
+        /* Grids */
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        
+        /* Cards */
+        .card { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding: 28px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); transition: 0.3s; cursor: pointer; }
+        .card:hover { transform: translateY(-4px); border-color: rgba(102,126,234,0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .card-icon { width: 48px; height: 48px; background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
+        .card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+        .card p { font-size: 14px; color: #888; line-height: 1.6; }
+        
+        /* Paper Cards */
+        .paper-card { background: rgba(255,255,255,0.03); padding: 28px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); }
+        .paper-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .cnt { background: linear-gradient(135deg, #667eea, #764ba2); padding: 4px 12px; border-radius: 20px; font-size: 13px; }
+        .areas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+        .tag { background: rgba(102,126,234,0.15); color: #667eea; padding: 5px 10px; border-radius: 6px; font-size: 11px; transition: 0.3s; cursor: pointer; }
+        .tag:hover { background: rgba(102,126,234,0.3); }
+        
+        /* Commit Cards */
+        .commit-card { background: linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05)); padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); text-align: center; transition: 0.3s; }
+        .commit-card:hover { transform: translateY(-4px); border-color: rgba(102,126,234,0.3); }
+        .commit-icon { font-size: 40px; margin-bottom: 16px; }
+        .commit-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .commit-card p { font-size: 13px; color: #888; line-height: 1.6; margin-bottom: 12px; }
+        .badge { display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        
+        /* API Cards */
+        .api-card { background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); font-family: 'Courier New', monospace; transition: 0.3s; cursor: pointer; }
+        .api-card:hover { transform: translateY(-2px); border-color: rgba(76,175,80,0.3); }
+        .method { color: #4CAF50; font-weight: bold; font-size: 12px; }
+        .endpoint { color: #667eea; font-size: 13px; }
+        .desc { color: #666; font-size: 11px; margin-top: 6px; }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; justify-content: center; flex-wrap: wrap; }
+        .tab { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 10px; cursor: pointer; transition: 0.3s; font-size: 14px; font-weight: 500; }
+        .tab.active { background: #667eea; border-color: #667eea; }
+        .tab:hover { background: rgba(102,126,234,0.2); }
+        
+        /* Contact */
+        .contact-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); transition: 0.3s; margin-bottom: 12px; }
+        .contact-item:hover { border-color: rgba(102,126,234,0.3); }
+        .contact-icon { font-size: 28px; width: 48px; text-align: center; }
+        .contact-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .contact-item p { font-size: 13px; color: #888; }
+        .socials { display: flex; gap: 10px; margin-top: 24px; }
+        .social { width: 48px; height: 48px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.3s; text-decoration: none; border: 1px solid rgba(255,255,255,0.1); }
+        .social:hover { background: #667eea; transform: translateY(-2px); }
+        
+        /* Chart */
+        .chart-container { background: rgba(255,255,255,0.03); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); }
+        
+        /* Table */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.03); border-radius: 12px; overflow: hidden; }
+        th { background: rgba(102,126,234,0.2); color: #fff; padding: 12px; font-size: 12px; font-weight: 600; text-align: left; }
+        td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+        td a { color: #667eea; text-decoration: none; }
+        td a:hover { text-decoration: underline; }
+        
+        /* Footer */
+        .footer { background: rgba(255,255,255,0.02); padding: 60px 0 30px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+        .footer h4 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+        .footer p { font-size: 13px; color: #666; line-height: 1.8; }
+        .footer a { font-size: 13px; color: #666; text-decoration: none; display: block; line-height: 2; transition: 0.3s; }
+        .footer a:hover { color: #667eea; }
+        .footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .footer-bottom p { font-size: 12px; color: #444; }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .hero-grid, .grid-2 { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 36px; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .nav { display: none; }
+            .mobile-menu { display: block; }
+            .grid-4 { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// Data
+const AUTISM_AREAS = ["اتصالات مغزی", "ژنتیک", "درمان", "تشخیص", "خانواده", "آموزش", "حسی", "ارتباط", "بزرگسالان", "فناوری"];
+const SCHIZO_AREAS = ["اتصالات مغزی", "ژنتیک", "درمان", "تشخیص", "خانواده", "عصب‌زیستی", "شناخت", "بهبود", "همراهی", "فناوری"];
+
+const FEATURES = [
+    { icon: "🧠", title: "تشخیص AI", desc: "تشخیص هوشمند با الگوریتم‌های یادگیری عمیق و 300 مقاله علمی" },
+    { icon: "📊", title: "تحلیل داده", desc: "تحلیل جامع داده‌های بالینی و پژوهشی با دقت بالا" },
+    { icon: "💊", title: "توصیه درمان", desc: "پروتکل‌های درمانی مبتنی بر شواهد و استانداردهای FDA" },
+    { icon: "📚", title: "300 مقاله", desc: "مقالات علمی معتبر در 20 حوزه تخصصی با DOI تأیید شده" },
+    { icon: "🤖", title: "ربات تلگرام", desc: "دسترسی آسان 24 ساعته از طریق ربات تلگرام" },
+    { icon: "🌐", title: "چند زبانه", desc: "پشتیبانی از فارسی، انگلیسی، عربی، ترکی" },
+    { icon: "📧", title: "سیستم ایمیل", desc: "ارسال ایمیل به سرمایه‌گذاران و خانواده‌ها" },
+    { icon: "🔌", title: "API کامل", desc: "رابط برنامه‌نویسی RESTful برای توسعه‌دهندگان" }
+];
+
+const COMMITS = [
+    { icon: "🔬", title: "تعهد علمی", desc: "تمام مقالات مبتنی بر شواهد علمی معتبر و ژورنال‌های بین‌المللی هستند", badge: "✅ Peer-Reviewed" },
+    { icon: "💚", title: "تعهد اخلاقی", desc: "حفظ حریم خصوصی، رعایت استانداردهای FDA و احترام به کرامت انسانی", badge: "✅ HIPAA Compliant" },
+    { icon: "🤝", title: "تعهد اجتماعی", desc: "دسترسی رایگان به منابع آموزشی و حمایت از خانواده‌ها و افراد مبتلا", badge: "✅ Free Access" }
+];
+
+const APIS = [
+    { method: "GET", endpoint: "/api/papers", desc: "تمام 300 مقاله" },
+    { method: "GET", endpoint: "/api/autism", desc: "100 مقاله اوتیسم" },
+    { method: "GET", endpoint: "/api/schizophrenia", desc: "100 مقاله اسکیزوفرنی" },
+    { method: "GET", endpoint: "/api/new", desc: "100 مقاله جدید" },
+    { method: "GET", endpoint: "/api/users", desc: "اطلاعات کاربران" },
+    { method: "POST", endpoint: "/api/email/send", desc: "ارسال ایمیل" }
+];
+
+// Header Component
+function Header({ activePage, setActivePage }) {
+    return (
+        <header className="header">
+            <div className="container">
+                <div className="hdr">
+                    <div className="logo" onClick={() => setActivePage('home')}>🧠 NeuroTrack AI</div>
+                    <nav className="nav">
+                        {['home','features','papers','commitment','api','contact'].map(page => (
+                            <a key={page} className={activePage === page ? 'active' : ''} onClick={() => setActivePage(page)}>
+                                {page === 'home' ? 'خانه' : page === 'features' ? 'ویژگی‌ها' : page === 'papers' ? 'مقالات' : page === 'commitment' ? 'تعهدات' : page === 'api' ? 'API' : 'تماس'}
+                            </a>
+                        ))}
+                    </nav>
+                    <div className="lang">
+                        <button className="lang-btn active">🇮🇷</button>
+                        <button className="lang-btn">🇬🇧</button>
+                        <button className="lang-btn">🇸🇦</button>
+                        <button className="lang-btn">🇹🇷</button>
+                    </div>
+                    <button className="mobile-menu">☰</button>
+                </div>
+            </div>
+        </header>
+    );
+}
+
+// Hero Component
+function Hero({ setActivePage }) {
+    return (
+        <section className="hero">
+            <div className="container">
+                <div className="hero-grid">
+                    <div>
+                        <div className="hero-badge">🚀 نسخه 4.0 - 300 مقاله تأیید شده</div>
+                        <h1>آینده <span>سلامت روان</span> با هوش مصنوعی</h1>
+                        <p>پلتفرم پیشرفته تشخیص و درمان اختلالات طیف اوتیسم و اسکیزوفرنی با 300 مقاله علمی معتبر و ابزارهای AI</p>
+                        <div className="btns">
+                            <a href="https://t.me/Ai_autism_schizo_bot" className="btn btn-p">🤖 شروع ربات</a>
+                            <a className="btn btn-o" onClick={() => setActivePage('papers')}>📄 مشاهده مقالات</a>
+                        </div>
+                        <div className="stats">
+                            <div className="stat"><div className="stat-n">300</div><div className="stat-l">مقاله علمی</div></div>
+                            <div className="stat"><div className="stat-n">20</div><div className="stat-l">حوزه تخصصی</div></div>
+                            <div className="stat"><div className="stat-n">100%</div><div className="stat-l">تأیید شده</div></div>
+                            <div className="stat"><div className="stat-n">24/7</div><div className="stat-l">پشتیبانی</div></div>
+                        </div>
+                    </div>
+                    <div className="visual">
+                        <div className="visual-icon">🧠</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// Features Component
+function Features() {
+    return (
+        <section className="section" id="features">
+            <div className="container">
+                <div className="section-t">
+                    <div className="section-badge">ویژگی‌ها</div>
+                    <h2>ابزارهای <span>پیشرفته</span></h2>
+                    <p>مجموعه کاملی از ابزارها برای تشخیص، درمان و پژوهش</p>
+                </div>
+                <div className="grid-4">
+                    {FEATURES.map((f, i) => (
+                        <div key={i} className="card">
+                            <div className="card-icon">{f.icon}</div>
+                            <h3>{f.title}</h3>
+                            <p>{f.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// Papers Component
+function Papers() {
+    const [activeTab, setActiveTab] = useState('autism');
+    const chartRef = useRef(null);
+    
+    useEffect(() => {
+        if (chartRef.current) {
+            const ctx = chartRef.current.getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: activeTab === 'autism' ? AUTISM_AREAS : SCHIZO_AREAS,
+                    datasets: [{
+                        data: Array(10).fill(10),
+                        backgroundColor: ['#667eea','#764ba2','#f093fb','#4CAF50','#ff9800','#e91e63','#00bcd4','#ff5722','#9c27b0','#607d8b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { color: '#888', font: { size: 11 } } } 
+                    } 
+                }
+            });
+        }
+    }, [activeTab]);
+    
+    return (
+        <section className="section" id="papers">
+            <div className="container">
+                <div className="section-t">
+                    <div className="section-badge">مقالات</div>
+                    <h2>300 مقاله <span>علمی</span></h2>
+                    <p>مقالات علمی معتبر با DOI تأیید شده در 20 حوزه تخصصی</p>
+                </div>
+                <div className="tabs">
+                    <button className={`tab ${activeTab === 'autism' ? 'active' : ''}`} onClick={() => setActiveTab('autism')}>🧩 اوتیسم (100)</button>
+                    <button className={`tab ${activeTab === 'schizo' ? 'active' : ''}`} onClick={() => setActiveTab('schizo')}>🧠 اسکیزوفرنی (100)</button>
+                    <button className={`tab ${activeTab === 'new' ? 'active' : ''}`} onClick={() => setActiveTab('new')}>🆕 جدید (100)</button>
+                </div>
+                <div className="grid-2">
+                    <div className="paper-card">
+                        <h3>{activeTab === 'autism' ? '🧩 اوتیسم' : activeTab === 'schizo' ? '🧠 اسکیزوفرنی' : '🆕 مقالات جدید'} <span className="cnt">100</span></h3>
+                        <p>مقالات علمی معتبر با DOI تأیید شده</p>
+                        <div className="areas">
+                            {(activeTab === 'autism' ? AUTISM_AREAS : SCHIZO_AREAS).map((a, i) => (
+                                <span key={i} className="tag">{['🧠','🧬','💊','🔍','👨‍👩‍👧','📖','👂','🗣️','👨','💻'][i]} {a}</span>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="chart-container">
+                        <canvas ref={chartRef}></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// Commitments Component
+function Commitments() {
+    return (
+        <section className="section" id="commitment">
+            <div className="container">
+                <div className="section-t">
+                    <div className="section-badge">تعهدات</div>
+                    <h2>سه تعهد <span>اصلی</span></h2>
+                    <p>تعهدات ما در قبال جامعه و علم</p>
+                </div>
+                <div className="grid-3">
+                    {COMMITS.map((c, i) => (
+                        <div key={i} className="commit-card">
+                            <div className="commit-icon">{c.icon}</div>
+                            <h3>{c.title}</h3>
+                            <p>{c.desc}</p>
+                            <div className="badge">{c.badge}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// API Component
+function APISection() {
+    return (
+        <section className="section" id="api">
+            <div className="container">
+                <div className="section-t">
+                    <div className="section-badge">API</div>
+                    <h2>دسترسی <span>API</span></h2>
+                    <p>رابط برنامه‌نویسی RESTful برای توسعه‌دهندگان</p>
+                </div>
+                <div className="grid-3">
+                    {APIS.map((a, i) => (
+                        <div key={i} className="api-card">
+                            <div><span className="method">{a.method}</span> <span className="endpoint">{a.endpoint}</span></div>
+                            <div className="desc">{a.desc}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// Contact Component
+function Contact() {
+    return (
+        <section className="section" id="contact">
+            <div className="container">
+                <div className="section-t">
+                    <div className="section-badge">تماس</div>
+                    <h2>تماس <span>با ما</span></h2>
+                    <p>ما آماده پاسخگویی به شما هستیم</p>
+                </div>
+                <div className="grid-2">
+                    <div>
+                        <div className="contact-item"><div className="contact-icon">📱</div><div><h4>تلفن</h4><p>+1-208-5033653</p></div></div>
+                        <div className="contact-item"><div className="contact-icon">💬</div><div><h4>واتساپ</h4><p>+1-208-5033653</p></div></div>
+                        <div className="contact-item"><div className="contact-icon">📧</div><div><h4>ایمیل</h4><p>neurotrack@ai.com</p></div></div>
+                        <div className="socials">
+                            <a href="https://t.me/Ai_autism_schizo_bot" className="social">🤖</a>
+                            <a href="https://t.me/Ai_autism_schizo" className="social">🇬🇧</a>
+                            <a href="https://t.me/Ai_autism_schizo_fa" className="social">🇮🇷</a>
+                            <a href="https://t.me/Ai_autism_schizo_group" className="social">👥</a>
+                        </div>
+                    </div>
+                    <div>
+                        <iframe src="https://neurotrack-bot.elasa2next.workers.dev/papers" style={{width:'100%',height:'400px',border:'none',borderRadius:'16px',background:'rgba(255,255,255,0.03)'}}></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// Footer Component
+function Footer({ setActivePage }) {
+    return (
+        <footer className="footer">
+            <div className="container">
+                <div className="footer-grid">
+                    <div>
+                        <h4>🧠 NeuroTrack AI</h4>
+                        <p>پلتفرم هوش مصنوعی سلامت روان - تشخیص و درمان اوتیسم و اسکیزوفرنی با 300 مقاله علمی معتبر</p>
+                    </div>
+                    <div>
+                        <h4>صفحات</h4>
+                        <a onClick={() => setActivePage('home')}>خانه</a>
+                        <a onClick={() => setActivePage('features')}>ویژگی‌ها</a>
+                        <a onClick={() => setActivePage('papers')}>مقالات</a>
+                        <a onClick={() => setActivePage('commitment')}>تعهدات</a>
+                    </div>
+                    <div>
+                        <h4>ربات‌ها</h4>
+                        <a href="https://t.me/Ai_autism_schizo_bot">🤖 ربات اصلی</a>
+                        <a href="https://t.me/Ai_autism_schizo">🇬🇧 کانال انگلیسی</a>
+                        <a href="https://t.me/Ai_autism_schizo_fa">🇮🇷 کانال فارسی</a>
+                        <a href="https://t.me/Ai_autism_schizo_group">👥 گروه</a>
+                    </div>
+                    <div>
+                        <h4>تماس</h4>
+                        <p>📱 +1-208-5033653</p>
+                        <p>💬 WhatsApp: +1-208-5033653</p>
+                        <p>📧 neurotrack@ai.com</p>
+                    </div>
+                </div>
+                <div className="footer-bottom">
+                    <p>© 2025 NeuroTrack AI - Version 4.0 (Complete with 300 Papers)</p>
+                </div>
+            </div>
+        </footer>
+    );
+}
+
+// App Component
+function App() {
+    const [activePage, setActivePage] = useState('home');
+    
+    return (
+        <>
+            <Header activePage={activePage} setActivePage={setActivePage} />
+            <Hero setActivePage={setActivePage} />
+            <Features />
+            <Papers />
+            <Commitments />
+            <APISection />
+            <Contact />
+            <Footer setActivePage={setActivePage} />
+        </>
+    );
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
